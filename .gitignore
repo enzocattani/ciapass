@@ -1,0 +1,7 @@
+node_modules/
+ciapass.db
+ciapass.db-journal
+ciapass.db-wal
+ciapass.db-shm
+.DS_Store
+*.log
