@@ -4,16 +4,9 @@ const usuarios = [
     "mariana.cattani",
     "kauan.airon",
     "ian.miranda",
-    "oberdam.drumond",
+    "oberdam.drummond",
     "juliana.cattani",
-    "pitter.drumond",
-    "Enzo.cattani",
-    "Mariana.cattani",
-    "Kauan.airon",
-    "Ian.miranda",
-    "Oberdam.drumond",
-    "Juliana.cattani",
-    "Pitter.drumond"
+    "pitter.drummond"
 ];
 
 // Senha padrão
@@ -25,7 +18,7 @@ const form = document.getElementById("loginForm");
 form.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const usuario = document.getElementById("usuario").value.trim();
+    const usuario = document.getElementById("usuario").value.trim().toLowerCase();
     const senha = document.getElementById("senha").value;
     const mensagemErro = document.getElementById("mensagemErro");
 
