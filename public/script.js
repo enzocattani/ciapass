@@ -4,9 +4,16 @@ const usuarios = [
     "mariana.cattani",
     "kauan.airon",
     "ian.miranda",
-    "oberdam.drummond",
+    "oberdam.drumond",
     "juliana.cattani",
-    "pitter.drummond"
+    "pitter.drumond"
+    "Enzo.cattani",
+    "Mariana.cattani",
+    "Kauan.airon",
+    "Ian.miranda",
+    "Oberdam.drumond",
+    "Juliana.cattani",
+    "Pitter.drumond"
 ];
 
 // Senha padrão
