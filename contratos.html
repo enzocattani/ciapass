@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiaPass - Contratos</title>
+
+    <!-- Reaproveita o tema visual do dashboard (sidebar, topbar, cores) -->
+    <link rel="stylesheet" href="dashboard.css">
+    <!-- Estilos específicos do módulo de Contratos -->
+    <link rel="stylesheet" href="contratos.css">
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-top">
+            <div class="brand-glyph">C</div>
+            <div class="brand-text">
+                <h2>CiaPass</h2>
+                <span>v1.0</span>
+            </div>
+        </div>
+
+        <nav class="menu">
+
+            <span class="menu-section-label">Painel</span>
+
+            <a href="dashboard.html" class="menu-item">
+                <span class="ico">▤</span><span class="label">Dashboard</span>
+            </a>
+
+            <a href="agenda.html" class="menu-item">
+                <span class="ico">📅</span><span class="label">Agenda</span>
+            </a>
+
+            <a href="tarefas.html" class="menu-item">
+                <span class="ico">✓</span><span class="label">Tarefas</span>
+            </a>
+
+            <span class="menu-section-label">Negócios</span>
+
+            <a href="contratos.html" class="menu-item active">
+                <span class="ico">📄</span><span class="label">Contratos</span>
+            </a>
+
+            <a href="patrocinios.html" class="menu-item">
+                <span class="ico">🤝</span><span class="label">Patrocínios</span>
+            </a>
+
+            <span class="menu-section-label">Banda</span>
+
+            <a href="musica.html" class="menu-item">
+                <span class="ico">🎵</span><span class="label">Música</span>
+            </a>
+
+            <button id="logoutMenu" class="menu-item logout-btn"><span class="ico">⏻</span><span class="label">Sair</span></button>
+
+        </nav>
+
+    </aside>
+
+    <div class="main-content">
+
+        <header class="topbar">
+
+            <div class="left-header">
+                <button id="toggleSidebar" class="menu-toggle">
+                    ☰
+                </button>
+
+                <h1>CIA PASS</h1>
+            </div>
+
+            <div class="right-header">
+
+                <div class="user-info">
+                    <span id="usuarioLogado"></span>
+                    <span id="badgePerfil" class="perfil-badge"></span>
+                </div>
+
+                <button id="logoutHeader" class="header-logout">
+                    Sair
+                </button>
+
+            </div>
+
+        </header>
+
+        <main class="dashboard contratos-page">
+
+            <!-- ===================== CABEÇALHO DO MÓDULO ===================== -->
+            <section class="contratos-toolbar">
+
+                <div class="contratos-titulo">
+                    <h2>Contratos</h2>
+                    <p>Controle de shows e oportunidades da Pitter &amp; Cia</p>
+                </div>
+
+                <button id="btnNovoContrato" class="btn-novo-contrato">
+                    + Novo Contrato
+                </button>
+
+            </section>
+
+            <!-- ===================== RESUMO RÁPIDO (mini KPIs) ===================== -->
+            <section class="cards contratos-resumo">
+
+                <div class="card">
+                    <h3>Total de Contratos</h3>
+                    <span id="kpiTotal">0</span>
+                </div>
+
+                <div class="card">
+                    <h3>Em Negociação</h3>
+                    <span id="kpiNegociacao">0</span>
+                </div>
+
+                <div class="card">
+                    <h3>Confirmados</h3>
+                    <span id="kpiConfirmados">0</span>
+                </div>
+
+                <div class="card">
+                    <h3>Perdidos</h3>
+                    <span id="kpiPerdidos">0</span>
+                </div>
+
+            </section>
+
+            <!-- ===================== FILTROS ===================== -->
+            <section class="filtros-contratos">
+
+                <button class="filtro-btn active" data-filtro="todos">
+                    Todos
+                </button>
+
+                <button class="filtro-btn" data-filtro="meus">
+                    Meus contratos
+                </button>
+
+                <button class="filtro-btn" data-filtro="confirmado">
+                    Confirmados
+                </button>
+
+                <button class="filtro-btn" data-filtro="negociacao">
+                    Em negociação
+                </button>
+
+                <button class="filtro-btn" data-filtro="perdido">
+                    Perdidos
+                </button>
+
+            </section>
+
+            <!-- ===================== LISTA DE CONTRATOS (cards) ===================== -->
+            <section class="lista-contratos" id="listaContratos">
+                <!-- Cards de contrato são renderizados dinamicamente via contratos.js -->
+            </section>
+
+            <!-- Mensagem exibida quando não há contratos para o filtro atual -->
+            <p id="mensagemVazia" class="mensagem-vazia" style="display:none;">
+                Nenhum contrato encontrado para este filtro.
+            </p>
+
+        </main>
+
+        <footer class="footer">
+            <p>CiaPass V1</p>
+            <p>Sistema interno de gestão da Pitter &amp; Cia</p>
+        </footer>
+
+    </div>
+
+    <!-- ===================== MODAL: NOVO / EDITAR CONTRATO ===================== -->
+    <div class="modal-overlay" id="modalContrato">
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+                <h2 id="modalTitulo">Novo Contrato</h2>
+                <button class="modal-close" id="btnFecharModal">&times;</button>
+            </div>
+
+            <form id="formContrato" class="form-contrato">
+
+                <!-- Guarda o id do contrato em edição (vazio = novo contrato) -->
+                <input type="hidden" id="contratoId">
+
+                <div class="form-grupo">
+                    <label for="inputEvento">Nome do Evento *</label>
+                    <input type="text" id="inputEvento" required placeholder="Ex: Festa da Cidade 2026">
+                </div>
+
+                <div class="form-linha">
+
+                    <div class="form-grupo">
+                        <label for="inputCidade">Cidade *</label>
+                        <input type="text" id="inputCidade" required placeholder="Ex: Poços de Caldas - MG">
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="inputData">Data do Evento *</label>
+                        <input type="date" id="inputData" required>
+                    </div>
+
+                </div>
+
+                <div class="form-linha">
+
+                    <div class="form-grupo">
+                        <label for="inputContato">Contato</label>
+                        <input type="text" id="inputContato" placeholder="Nome do contratante / referência">
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="inputTelefone">Telefone / WhatsApp</label>
+                        <input type="text" id="inputTelefone" placeholder="(35) 99999-9999">
+                    </div>
+
+                </div>
+
+                <div class="form-linha">
+
+                    <div class="form-grupo">
+                        <label for="inputCache">Valor do Cachê (opcional)</label>
+                        <input type="text" id="inputCache" placeholder="Ex: R$ 5.000,00">
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="inputResponsavel">Responsável *</label>
+                        <input type="text" id="inputResponsavel" required placeholder="Quem está cuidando deste contrato">
+                    </div>
+
+                </div>
+
+                <div class="form-grupo">
+                    <label for="inputStatus">Status</label>
+                    <select id="inputStatus">
+                        <option value="prospeccao">Prospecção</option>
+                        <option value="negociacao">Negociação</option>
+                        <option value="producao">Produção</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="executado">Executado</option>
+                        <option value="perdido">Perdido</option>
+                    </select>
+                </div>
+
+                <div class="form-grupo">
+                    <label for="inputObservacoes">Observações</label>
+                    <textarea id="inputObservacoes" rows="3" placeholder="Detalhes, condições, pendências..."></textarea>
+                </div>
+
+                <div class="form-grupo">
+                    <label>Anexo do Contrato (PDF)</label>
+
+                    <div class="anexo-area">
+
+                        <input type="file" id="inputArquivoPdf" accept="application/pdf">
+
+                        <input type="url" id="inputLinkPdf" placeholder="ou cole um link (Drive, Dropbox...)">
+
+                    </div>
+
+                    <div id="anexoPreview" class="anexo-preview" style="display:none;">
+                        <span id="anexoPreviewNome"></span>
+                        <button type="button" id="btnRemoverAnexo" class="btn-remover-anexo">Remover</button>
+                    </div>
+
+                    <small class="anexo-aviso">PDF até 4MB (fica salvo no navegador). Para arquivos maiores, use o campo de link.</small>
+                </div>
+
+
+                <div class="form-acoes">
+                    <button type="button" id="btnCancelarForm" class="btn-cancelar">Cancelar</button>
+                    <button type="submit" class="btn-salvar">Salvar Contrato</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ===================== MODAL: CONFIRMAÇÃO DE EXCLUSÃO ===================== -->
+    <div class="modal-overlay" id="modalExcluir">
+
+        <div class="modal-box modal-box-pequena">
+
+            <div class="modal-header">
+                <h2>Excluir Contrato</h2>
+                <button class="modal-close" id="btnFecharModalExcluir">&times;</button>
+            </div>
+
+            <p class="texto-confirmacao">
+                Tem certeza que deseja excluir o contrato
+                "<span id="nomeContratoExcluir"></span>"?
+                Esta ação não pode ser desfeita.
+            </p>
+
+            <div class="form-acoes">
+                <button type="button" id="btnCancelarExcluir" class="btn-cancelar">Cancelar</button>
+                <button type="button" id="btnConfirmarExcluir" class="btn-excluir">Excluir</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!--
+        Observação: contratos.html NÃO importa dashboard.js.
+        O dashboard.js tenta escrever em "mensagemBoasVindas", elemento que
+        só existe em dashboard.html. Para não alterar dashboard.js nem
+        arriscar quebrar nada, a lógica de sessão/sidebar/logout (idêntica
+        à do dashboard) está replicada dentro de contratos.js.
+    -->
+    
+<script>
+(function(){
+  var u = localStorage.getItem("usuarioLogado");
+  if(!u){ window.location.href="index.html"; return; }
+  var ADMINS = ["oberdam.drummond", "mariana.cattani"];
+  var VOCALISTAS = ["juliana.cattani", "pitter.drummond"];
+  function cargoDe(login){
+      if (ADMINS.indexOf(login) !== -1) return "Admin";
+      if (VOCALISTAS.indexOf(login) !== -1) return "Vocalista";
+      return "Membro";
+  }
+  var el = document.getElementById("usuarioLogado");
+  if(el){ var p=u.split(".")[0]; el.textContent = p.charAt(0).toUpperCase()+p.slice(1); }
+  var badgeEl = document.getElementById("badgePerfil");
+  if(badgeEl){ var cargo = cargoDe(u); badgeEl.textContent = cargo; badgeEl.className = "perfil-badge " + cargo.toLowerCase(); }
+  function logout(){ localStorage.removeItem("usuarioLogado"); window.location.href="index.html"; }
+  var lm=document.getElementById("logoutMenu");
+  var lh=document.getElementById("logoutHeader");
+  if(lm) lm.addEventListener("click",logout);
+  if(lh) lh.addEventListener("click",logout);
+  var sb=document.getElementById("sidebar");
+  var tg=document.getElementById("toggleSidebar");
+  if(tg&&sb) tg.addEventListener("click",function(){ if(window.innerWidth<=768) sb.classList.toggle("mobile-open"); else sb.classList.toggle("collapsed"); });
+})();
+</script>
+<script src="api.js"></script>
+<script src="contratos.js" defer></script>
+
+</body>
+</html>

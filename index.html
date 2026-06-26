@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiaPass - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="login-screen">
+
+        <!-- ===== PAINEL LATERAL DE IDENTIDADE ===== -->
+        <div class="brand-panel">
+            <div class="brand-panel-inner">
+                <div class="brand-mark">
+                    <span class="brand-mark-glyph">C</span>
+                </div>
+                <h1 class="brand-name">CiaPass</h1>
+                <p class="brand-tag">Plataforma de gestão interna</p>
+
+                <ul class="brand-features">
+                    <li><span class="bf-dot"></span>Agenda &amp; eventos</li>
+                    <li><span class="bf-dot"></span>Tarefas da equipe</li>
+                    <li><span class="bf-dot"></span>Contratos &amp; patrocínios</li>
+                    <li><span class="bf-dot"></span>Repertório musical</li>
+                </ul>
+
+                <p class="brand-footer-note">Pitter &amp; Cia — sistema interno</p>
+            </div>
+        </div>
+
+        <!-- ===== PAINEL DE LOGIN ===== -->
+        <div class="form-panel">
+            <div class="login-card">
+
+                <div class="login-card-head">
+                    <span class="login-eyebrow">Acesso ao sistema</span>
+                    <h2>Entrar na sua conta</h2>
+                </div>
+
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="usuario">Usuário</label>
+                        <input type="text" id="usuario" placeholder="ex: enzo.cattani" autocomplete="username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="senha">Senha</label>
+                        <input type="password" id="senha" placeholder="Digite sua senha" autocomplete="current-password" required>
+                    </div>
+
+                    <button type="submit">
+                        <span>Entrar</span>
+                    </button>
+
+                    <p id="mensagemErro" role="alert"></p>
+                </form>
+
+                <div class="login-card-foot">
+                    <span class="status-dot"></span>
+                    <span>Sistema operando normalmente</span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,268 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+
+:root{
+    --navy-950:#0a1e42;
+    --navy-900:#0f4cbd;
+    --navy-800:#1361d6;
+    --navy-100:#e8f0fe;
+    --ink:#1c2d4d;
+    --ink-soft:#5b6b85;
+    --line:#e2e8f4;
+    --bg:#f4f7fb;
+    --danger:#e53935;
+    --good:#1a9c5b;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+}
+
+.login-screen{
+    display:flex;
+    min-height:100vh;
+}
+
+/* ===== PAINEL DE MARCA ===== */
+
+.brand-panel{
+    flex:1 1 46%;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.07), transparent 40%),
+        linear-gradient(155deg, var(--navy-950) 0%, var(--navy-900) 62%, var(--navy-800) 100%);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    padding:60px;
+}
+
+.brand-panel::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.9) 30%, rgba(0,0,0,.9) 75%, transparent);
+}
+
+.brand-panel-inner{
+    position:relative;
+    z-index:1;
+    max-width:380px;
+}
+
+.brand-mark{
+    width:52px;
+    height:52px;
+    border-radius:12px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:28px;
+}
+
+.brand-mark-glyph{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:22px;
+}
+
+.brand-name{
+    font-size:34px;
+    font-weight:800;
+    letter-spacing:-.02em;
+    margin-bottom:8px;
+}
+
+.brand-tag{
+    font-size:15px;
+    color:rgba(255,255,255,.7);
+    margin-bottom:36px;
+}
+
+.brand-features{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-bottom:48px;
+}
+
+.brand-features li{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:14px;
+    color:rgba(255,255,255,.85);
+}
+
+.bf-dot{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#7fb2ff;
+    flex-shrink:0;
+}
+
+.brand-footer-note{
+    font-size:12px;
+    color:rgba(255,255,255,.45);
+    border-top:1px solid rgba(255,255,255,.12);
+    padding-top:18px;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.02em;
+}
+
+/* ===== PAINEL DE FORMULÁRIO ===== */
+
+.form-panel{
+    flex:1 1 54%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+}
+
+.login-card{
+    width:100%;
+    max-width:380px;
+}
+
+.login-card-head{
+    margin-bottom:32px;
+}
+
+.login-eyebrow{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--navy-900);
+    background:var(--navy-100);
+    padding:4px 10px;
+    border-radius:6px;
+    margin-bottom:14px;
+}
+
+.login-card-head h2{
+    font-size:23px;
+    font-weight:700;
+    color:var(--ink);
+    letter-spacing:-.01em;
+}
+
+.input-group{
+    margin-bottom:18px;
+    display:flex;
+    flex-direction:column;
+}
+
+.input-group label{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:7px;
+}
+
+.input-group input{
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:9px;
+    font-size:14.5px;
+    font-family:inherit;
+    color:var(--ink);
+    background:white;
+    transition:border-color .15s, box-shadow .15s;
+}
+
+.input-group input::placeholder{
+    color:#b7c0d1;
+}
+
+.input-group input:focus{
+    outline:none;
+    border-color:var(--navy-900);
+    box-shadow:0 0 0 3px rgba(15,76,189,.12);
+}
+
+button[type="submit"]{
+    width:100%;
+    background:var(--navy-900);
+    color:white;
+    border:none;
+    padding:13px;
+    border-radius:9px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:6px;
+    transition:background .15s, transform .1s;
+}
+
+button[type="submit"]:hover{
+    background:var(--navy-800);
+}
+
+button[type="submit"]:active{
+    transform:translateY(1px);
+}
+
+#mensagemErro{
+    color:var(--danger);
+    font-size:13px;
+    font-weight:600;
+    margin-top:14px;
+    min-height:18px;
+}
+
+.login-card-foot{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:34px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--ink-soft);
+}
+
+.status-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--good);
+    box-shadow:0 0 0 3px rgba(26,156,91,.15);
+}
+
+@media(max-width:860px){
+    .login-screen{
+        flex-direction:column;
+    }
+    .brand-panel{
+        flex:0 0 auto;
+        padding:40px 32px;
+    }
+    .brand-features{
+        display:none;
+    }
+    .form-panel{
+        padding:32px 24px;
+    }
+}

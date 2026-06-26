@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiaPass - Agenda</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="agenda.css">
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-top">
+            <div class="brand-glyph">C</div>
+            <div class="brand-text">
+                <h2>CiaPass</h2>
+                <span>v1.0</span>
+            </div>
+        </div>
+
+        <nav class="menu">
+
+            <span class="menu-section-label">Painel</span>
+
+            <a href="dashboard.html" class="menu-item">
+                <span class="ico">▤</span><span class="label">Dashboard</span>
+            </a>
+
+            <a href="agenda.html" class="menu-item active">
+                <span class="ico">📅</span><span class="label">Agenda</span>
+            </a>
+
+            <a href="tarefas.html" class="menu-item">
+                <span class="ico">✓</span><span class="label">Tarefas</span>
+            </a>
+
+            <span class="menu-section-label">Negócios</span>
+
+            <a href="contratos.html" class="menu-item">
+                <span class="ico">📄</span><span class="label">Contratos</span>
+            </a>
+
+            <a href="patrocinios.html" class="menu-item">
+                <span class="ico">🤝</span><span class="label">Patrocínios</span>
+            </a>
+
+            <span class="menu-section-label">Banda</span>
+
+            <a href="musica.html" class="menu-item">
+                <span class="ico">🎵</span><span class="label">Música</span>
+            </a>
+
+            <button id="logoutMenu" class="menu-item logout-btn"><span class="ico">⏻</span><span class="label">Sair</span></button>
+
+        </nav>
+
+    </aside>
+
+    <div class="main-content">
+
+        <header class="topbar">
+
+            <div class="left-header">
+                <button id="toggleSidebar" class="menu-toggle">☰</button>
+                <h1>CIA PASS</h1>
+            </div>
+
+            <div class="right-header">
+                <div class="user-info">
+                    <span id="usuarioLogado"></span>
+                    <span id="badgePerfil" class="perfil-badge"></span>
+                </div>
+                <button id="logoutHeader" class="header-logout">Sair</button>
+            </div>
+
+        </header>
+
+        <main class="agenda-wrap">
+
+            <div class="cal-card">
+
+                <div class="cal-topbar">
+                    <div class="cal-nav">
+                        <button id="prevBtn" aria-label="Mês anterior">&#8249;</button>
+                        <button id="nextBtn" aria-label="Próximo mês">&#8250;</button>
+                    </div>
+                    <button class="cal-today-btn" id="todayBtn">Hoje</button>
+                    <span class="cal-month-label" id="monthLabel"></span>
+                    <div class="cal-spacer"></div>
+                    <button class="btn-new-evt" id="newEvtBtn">+ Novo evento</button>
+                </div>
+
+                <div class="cal-weekdays">
+                    <div class="cal-weekday">Dom</div>
+                    <div class="cal-weekday">Seg</div>
+                    <div class="cal-weekday">Ter</div>
+                    <div class="cal-weekday">Qua</div>
+                    <div class="cal-weekday">Qui</div>
+                    <div class="cal-weekday">Sex</div>
+                    <div class="cal-weekday">Sáb</div>
+                </div>
+
+                <div class="cal-grid" id="calGrid"></div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Modal: criar / editar evento -->
+    <div class="modal-overlay" id="newModal">
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mModalTitle">
+
+            <div class="modal-head">
+                <h3 id="mModalTitle">Novo evento</h3>
+                <button class="modal-close" id="closeNewModal" aria-label="Fechar">×</button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="field">
+                    <label for="mTitle">Título</label>
+                    <input id="mTitle" type="text" placeholder="Ex: Reunião com cliente">
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="mDate">Data</label>
+                        <input id="mDate" type="date">
+                    </div>
+                    <div class="field">
+                        <label for="mResp">Responsável</label>
+                        <input id="mResp" type="text" placeholder="Ex: Mariana">
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="mTimeStart">Início</label>
+                        <input id="mTimeStart" type="time">
+                    </div>
+                    <div class="field">
+                        <label for="mTimeEnd">Término</label>
+                        <input id="mTimeEnd" type="time">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="mDesc">Descrição</label>
+                    <textarea id="mDesc" placeholder="Detalhes do evento..."></textarea>
+                </div>
+
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn-cancel" id="cancelNewModal">Cancelar</button>
+                <button class="btn-save" id="saveEvtBtn">Salvar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal: detalhes do evento -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-box" role="dialog" aria-modal="true">
+
+            <div class="detail-head">
+                <span class="detail-pill evt-pill" id="dtPill"></span>
+                <button class="modal-close" id="closeDetailModal" aria-label="Fechar">×</button>
+            </div>
+
+            <div class="detail-body">
+                <div class="detail-row">
+                    <span class="detail-icon">📅</span>
+                    <span id="dtDate"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-icon">🕐</span>
+                    <span id="dtTime"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-icon">👤</span>
+                    <span id="dtResp"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-icon">📝</span>
+                    <span id="dtDesc" style="color:#666"></span>
+                </div>
+            </div>
+
+            <div class="detail-foot">
+                <button class="btn-delete" id="dtDelBtn">🗑 Excluir</button>
+                <button class="btn-save" id="dtEditBtn">✏️ Editar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    (function(){
+        var u = localStorage.getItem("usuarioLogado");
+        if(!u){ window.location.href="index.html"; return; }
+        var ADMINS = ["oberdam.drummond", "mariana.cattani"];
+        var VOCALISTAS = ["juliana.cattani", "pitter.drummond"];
+        function cargoDe(login){
+            if (ADMINS.indexOf(login) !== -1) return "Admin";
+            if (VOCALISTAS.indexOf(login) !== -1) return "Vocalista";
+            return "Membro";
+        }
+        var el = document.getElementById("usuarioLogado");
+        if(el){ var p=u.split(".")[0]; el.textContent = p.charAt(0).toUpperCase()+p.slice(1); }
+        var badgeEl = document.getElementById("badgePerfil");
+        if(badgeEl){ var cargo = cargoDe(u); badgeEl.textContent = cargo; badgeEl.className = "perfil-badge " + cargo.toLowerCase(); }
+        function logout(){ localStorage.removeItem("usuarioLogado"); window.location.href="index.html"; }
+        var lm = document.getElementById("logoutMenu");
+        var lh = document.getElementById("logoutHeader");
+        if(lm) lm.addEventListener("click", logout);
+        if(lh) lh.addEventListener("click", logout);
+        var sb = document.getElementById("sidebar");
+        var tg = document.getElementById("toggleSidebar");
+        if(tg && sb) tg.addEventListener("click", function(){
+            if(window.innerWidth <= 768) sb.classList.toggle("mobile-open");
+            else sb.classList.toggle("collapsed");
+        });
+    })();
+    </script>
+    <script src="api.js"></script>
+    <script src="agenda.js"></script>
+
+</body>
+</html>
