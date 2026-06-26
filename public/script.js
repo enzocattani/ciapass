@@ -6,7 +6,7 @@ const usuarios = [
     "ian.miranda",
     "oberdam.drumond",
     "juliana.cattani",
-    "pitter.drumond"
+    "pitter.drumond",
     "Enzo.cattani",
     "Mariana.cattani",
     "Kauan.airon",
