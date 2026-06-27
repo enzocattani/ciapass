@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tarefas - CiaPass</title>
+
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="tarefas.css">
+</head>
+
+<body>
+
+<aside class="sidebar" id="sidebar">
+
+<div class="sidebar-top">
+    <div class="brand-glyph">C</div>
+    <div class="brand-text">
+        <h2>CiaPass</h2>
+        <span>v1.0</span>
+    </div>
+</div>
+
+<nav class="menu">
+<span class="menu-section-label">Painel</span>
+<a href="dashboard.html" class="menu-item"><span class="ico">▤</span><span class="label">Dashboard</span></a>
+<a href="agenda.html" class="menu-item"><span class="ico">📅</span><span class="label">Agenda</span></a>
+<a href="tarefas.html" class="menu-item active"><span class="ico">✓</span><span class="label">Tarefas</span></a>
+<span class="menu-section-label">Negócios</span>
+<a href="contratos.html" class="menu-item"><span class="ico">📄</span><span class="label">Contratos</span></a>
+<a href="patrocinios.html" class="menu-item"><span class="ico">🤝</span><span class="label">Patrocínios</span></a>
+<span class="menu-section-label">Banda</span>
+<a href="musica.html" class="menu-item"><span class="ico">🎵</span><span class="label">Música</span></a>
+<button id="logoutMenu" class="menu-item logout-btn"><span class="ico">⏻</span><span class="label">Sair</span></button>
+</nav>
+
+</aside>
+
+<div class="main-content">
+
+<header class="topbar">
+<div class="left-header"><button id="toggleSidebar" class="menu-toggle">☰</button><h1>Tarefas</h1></div>
+<div class="right-header"><div class="user-info"><span id="usuarioLogado"></span><span id="badgePerfil" class="perfil-badge"></span></div><button id="logoutHeader" class="header-logout">Sair</button></div>
+</header>
+
+<main class="dashboard">
+
+<button id="btnNova" class="btn-primary big-btn">➕ Nova Tarefa</button>
+
+<div id="lista"></div>
+
+</main>
+
+</div>
+
+<!-- MODAL GRANDE -->
+<div id="modal" class="modal hidden">
+
+<div class="box">
+
+<h2>Nova Tarefa</h2>
+
+<div class="grid">
+
+<input id="titulo" placeholder="Título">
+<textarea id="descricao" placeholder="Descrição"></textarea>
+
+<select id="responsavel">
+<option value="enzo.cattani">Enzo</option>
+<option value="mariana.cattani">Mariana</option>
+<option value="kauan.airon">Kauan</option>
+<option value="ian.miranda">Ian</option>
+<option value="oberdam.drumond">Oberdam</option>
+</select>
+
+<input type="date" id="prazo">
+
+<input type="number" id="total" placeholder="Total de etapas">
+<input type="number" id="feitas" placeholder="Etapas concluídas">
+
+</div>
+
+<div class="actions">
+<button id="salvar" class="btn-primary">Salvar</button>
+<button id="fechar" class="btn-secondary">Cancelar</button>
+</div>
+
+</div>
+
+</div>
+
+<!-- MODAL DETALHES -->
+<div id="modalDetalhe" class="modal hidden">
+  <div class="box detalhe-box">
+    <div class="detalhe-header">
+      <div>
+        <h2 id="detalheTitulo"></h2>
+        <span id="detalheBadge" class="detalhe-badge"></span>
+      </div>
+      <button id="fecharDetalhe" class="btn-fechar-detalhe">✕</button>
+    </div>
+    <div class="detalhe-body">
+      <div class="detalhe-row">
+        <span class="detalhe-label">👤 Responsável</span>
+        <span id="detalheResp"></span>
+      </div>
+      <div class="detalhe-row">
+        <span class="detalhe-label">📅 Prazo</span>
+        <span id="detalhePrazo"></span>
+      </div>
+      <div class="detalhe-row detalhe-row-desc">
+        <span class="detalhe-label">📝 Descrição</span>
+        <p id="detalheDesc"></p>
+      </div>
+      <div class="detalhe-row">
+        <span class="detalhe-label">📊 Progresso</span>
+        <span id="detalheProgresso"></span>
+      </div>
+      <div class="bar detalhe-bar">
+        <div class="fill" id="detalheFill"></div>
+      </div>
+    </div>
+    <div class="detalhe-footer">
+      <button id="btnAvancar" class="btn-primary">▶ Avançar etapa</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var u = localStorage.getItem("usuarioLogado");
+  if(!u){ window.location.href="index.html"; return; }
+  var ADMINS = ["oberdam.drumond", "mariana.cattani"];
+  var VOCALISTAS = ["juliana.cattani", "pitter.drumond"];
+  function cargoDe(login){
+      if (ADMINS.indexOf(login) !== -1) return "Admin";
+      if (VOCALISTAS.indexOf(login) !== -1) return "Vocalista";
+      return "Membro";
+  }
+  var el = document.getElementById("usuarioLogado");
+  if(el){ var p=u.split(".")[0]; el.textContent = p.charAt(0).toUpperCase()+p.slice(1); }
+  var badgeEl = document.getElementById("badgePerfil");
+  if(badgeEl){ var cargo = cargoDe(u); badgeEl.textContent = cargo; badgeEl.className = "perfil-badge " + cargo.toLowerCase(); }
+  function logout(){ localStorage.removeItem("usuarioLogado"); window.location.href="index.html"; }
+  var lm=document.getElementById("logoutMenu");
+  var lh=document.getElementById("logoutHeader");
+  if(lm) lm.addEventListener("click",logout);
+  if(lh) lh.addEventListener("click",logout);
+  var sb=document.getElementById("sidebar");
+  var tg=document.getElementById("toggleSidebar");
+  if(tg&&sb) tg.addEventListener("click",function(){ if(window.innerWidth<=768) sb.classList.toggle("mobile-open"); else sb.classList.toggle("collapsed"); });
+})();
+</script>
+<script src="api.js"></script>
+<script src="tarefas.js"></script>
+</body>
+</html>
