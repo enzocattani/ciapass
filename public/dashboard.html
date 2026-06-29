@@ -117,25 +117,32 @@
                 <section class="cards">
                     <div class="card">
                         <h3>Tarefas Pendentes</h3>
-                        <span id="cardTarefas">0</span>
+                        <span id="cardTarefas">—</span>
                     </div>
                     <div class="card">
                         <h3>Próximos Eventos</h3>
-                        <span>0</span>
+                        <span id="cardAgenda">—</span>
                     </div>
                     <div class="card">
                         <h3>Contratos em Andamento</h3>
-                        <span>0</span>
+                        <span id="cardContratos">—</span>
                     </div>
                     <div class="card">
                         <h3>Patrocínios em Negociação</h3>
-                        <span>0</span>
+                        <span id="cardPatrocinios">—</span>
                     </div>
+                </section>
+
+                <!-- Resumo rápido abaixo dos cards -->
+                <section class="resumo-section" id="resumoSection" style="display:none">
+                    <div class="resumo-grid" id="resumoGrid"></div>
                 </section>
 
                 <section class="missions">
                     <h2>Missões da Equipe</h2>
-                    <div class="mission-list" id="missionList"></div>
+                    <div class="mission-list" id="missionList">
+                        <p style="color:var(--ink-faint);font-size:13px;">Carregando...</p>
+                    </div>
                 </section>
 
             </div>
@@ -412,14 +419,209 @@
             })[0];
         }
 
+        /* Retorna o evento mais próximo no futuro (ou hoje) */
+        function eventoMaisProximo(eventos) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const futuros = eventos
+                .filter(e => e.data && new Date(e.data + "T00:00:00") >= hoje)
+                .sort((a, b) => new Date(a.data) - new Date(b.data));
+            return futuros[0] || null;
+        }
+
+        /* Retorna o contrato mais próximo do vencimento (entre os "em andamento") */
+        function contratoMaisProximo(contratos) {
+            const emAndamento = contratos.filter(c => {
+                const st = (c.status || "").toLowerCase();
+                return st === "em andamento" || st === "andamento" || st === "ativo";
+            });
+            if (!emAndamento.length) return null;
+            return emAndamento.slice().sort((a, b) => {
+                const da = a.dataShow || a.data || a.vencimento || "";
+                const db = b.dataShow || b.data || b.vencimento || "";
+                return new Date(da) - new Date(db);
+            })[0];
+        }
+
         const VOCALISTAS = ["juliana.cattani", "pitter.drumond"];
         const isVocal    = VOCALISTAS.includes(usuario);
 
         /* ====================================================
-           1. VISÃO PADRÃO — MISSÕES DA EQUIPE
+           FUNÇÃO PRINCIPAL — carregarDashboard()
+           Busca todas as coleções em paralelo e popula a UI.
            ==================================================== */
 
-        if (!isVocal) {
+        async function carregarDashboard() {
+
+            /* --------------------------------------------------
+               Busca paralela de todas as coleções necessárias.
+               Falhas individuais retornam [] sem derrubar o restante.
+               -------------------------------------------------- */
+            const safe = fn => fn.catch(e => { console.error(e); return []; });
+
+            if (isVocal) {
+                /* Vocalistas só precisam de duas coleções */
+                const [tarefasVocaisTodas, sugestoes] = await Promise.all([
+                    safe(apiListar("tarefas_vocais")),
+                    safe(apiListar("sugestoes"))
+                ]);
+                renderViewVocalista(tarefasVocaisTodas, sugestoes);
+            } else {
+                /* Visão padrão: todas as coleções */
+                const [tarefas, agenda, contratos, patrocinios] = await Promise.all([
+                    safe(apiListar("tarefas")),
+                    safe(apiListar("agenda")),
+                    safe(apiListar("contratos")),
+                    safe(apiListar("patrocinios"))
+                ]);
+                renderViewPadrao(tarefas, agenda, contratos, patrocinios);
+            }
+        }
+
+        /* ====================================================
+           VISÃO PADRÃO
+           ==================================================== */
+
+        function renderViewPadrao(tarefas, agenda, contratos, patrocinios) {
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            /* ---- 1. TAREFAS ---- */
+
+            // Tarefas pendentes = não concluídas (feitas < total, ou total = 0)
+            const tarefasPendentes = tarefas.filter(t => !(t.feitas >= t.total && t.total > 0));
+
+            // Tarefas atrasadas = com prazo no passado e não concluídas
+            const tarefasAtrasadas = tarefasPendentes.filter(t => {
+                if (!t.prazo) return false;
+                return new Date(t.prazo + "T00:00:00") < hoje;
+            });
+
+            // Próxima tarefa por prazo
+            const proximaTarefa = tarefaMaisUrgente(tarefasPendentes);
+
+            document.getElementById("cardTarefas").textContent = tarefasPendentes.length;
+
+            /* ---- 2. AGENDA ---- */
+
+            // Próximos eventos = a partir de hoje
+            const proximosEventos = agenda.filter(e => {
+                if (!e.data) return false;
+                return new Date(e.data + "T00:00:00") >= hoje;
+            });
+            const proximoEvento = eventoMaisProximo(agenda);
+
+            document.getElementById("cardAgenda").textContent = proximosEventos.length;
+
+            /* ---- 3. CONTRATOS ---- */
+
+            // Contratos em andamento
+            const contratosAtivos = contratos.filter(c => {
+                const st = (c.status || "").toLowerCase();
+                return st === "em andamento" || st === "andamento" || st === "ativo";
+            });
+            const proximoContrato = contratoMaisProximo(contratos);
+
+            document.getElementById("cardContratos").textContent = contratosAtivos.length;
+
+            /* ---- 4. PATROCÍNIOS ---- */
+
+            // Patrocínios em negociação
+            const patrociniosNegociacao = patrocinios.filter(p => {
+                const st = (p.status || "").toLowerCase();
+                return st === "em negociação" || st === "negociação" || st === "negociacao";
+            });
+
+            document.getElementById("cardPatrocinios").textContent = patrociniosNegociacao.length;
+
+            /* ---- 5. RESUMO RÁPIDO (atrasadas + próximo evento + próximo contrato) ---- */
+
+            const resumoGrid = document.getElementById("resumoGrid");
+            const resumoSection = document.getElementById("resumoSection");
+            const itensResumo = [];
+
+            if (tarefasAtrasadas.length > 0) {
+                const nomes = tarefasAtrasadas
+                    .slice(0, 3)
+                    .map(t => `<li>${t.titulo} <span class="resumo-sub">(${primeiroNome(t.responsavel)})</span></li>`)
+                    .join("");
+                const extra = tarefasAtrasadas.length > 3
+                    ? `<li class="resumo-sub">+${tarefasAtrasadas.length - 3} mais...</li>`
+                    : "";
+                itensResumo.push(`
+                    <div class="resumo-card resumo-alerta">
+                        <div class="resumo-icon">⚠️</div>
+                        <div class="resumo-body">
+                            <strong>Tarefas atrasadas (${tarefasAtrasadas.length})</strong>
+                            <ul>${nomes}${extra}</ul>
+                        </div>
+                    </div>`);
+            }
+
+            if (proximaTarefa) {
+                const dias = diasRestantes(proximaTarefa.prazo);
+                let prazoTxt;
+                if (!proximaTarefa.prazo)  prazoTxt = "Sem prazo";
+                else if (dias < 0)         prazoTxt = `Atrasada há ${Math.abs(dias)} dia(s)`;
+                else if (dias === 0)        prazoTxt = "Prazo: hoje";
+                else                        prazoTxt = `Prazo em ${dias} dia(s) — ${fmt(proximaTarefa.prazo)}`;
+                itensResumo.push(`
+                    <div class="resumo-card resumo-info">
+                        <div class="resumo-icon">✓</div>
+                        <div class="resumo-body">
+                            <strong>Próxima tarefa</strong>
+                            <p>${proximaTarefa.titulo}</p>
+                            <span class="resumo-sub">${prazoTxt} · ${primeiroNome(proximaTarefa.responsavel)}</span>
+                        </div>
+                    </div>`);
+            }
+
+            if (proximoEvento) {
+                const diasEvt = diasRestantes(proximoEvento.data);
+                const prazoEvtTxt = diasEvt === 0
+                    ? "Hoje"
+                    : diasEvt === 1
+                    ? "Amanhã"
+                    : `Em ${diasEvt} dia(s) — ${fmt(proximoEvento.data)}`;
+                itensResumo.push(`
+                    <div class="resumo-card resumo-info">
+                        <div class="resumo-icon">📅</div>
+                        <div class="resumo-body">
+                            <strong>Próximo evento</strong>
+                            <p>${proximoEvento.titulo || proximoEvento.nome || "Evento"}</p>
+                            <span class="resumo-sub">${prazoEvtTxt}</span>
+                        </div>
+                    </div>`);
+            }
+
+            if (proximoContrato) {
+                const dataRef = proximoContrato.dataShow || proximoContrato.data || proximoContrato.vencimento || "";
+                const diasCtr = dataRef ? diasRestantes(dataRef) : null;
+                const prazoCtTxt = diasCtr === null
+                    ? "Sem data definida"
+                    : diasCtr < 0
+                    ? `Venceu há ${Math.abs(diasCtr)} dia(s)`
+                    : diasCtr === 0
+                    ? "Hoje"
+                    : `Em ${diasCtr} dia(s) — ${fmt(dataRef)}`;
+                itensResumo.push(`
+                    <div class="resumo-card resumo-info">
+                        <div class="resumo-icon">📄</div>
+                        <div class="resumo-body">
+                            <strong>Contrato mais próximo</strong>
+                            <p>${proximoContrato.nome || proximoContrato.titulo || "Contrato"}</p>
+                            <span class="resumo-sub">${prazoCtTxt}</span>
+                        </div>
+                    </div>`);
+            }
+
+            if (itensResumo.length > 0) {
+                resumoGrid.innerHTML = itensResumo.join("");
+                resumoSection.style.display = "block";
+            }
+
+            /* ---- 6. MISSÕES DA EQUIPE ---- */
 
             const EQUIPE = [
                 "enzo.cattani",
@@ -429,18 +631,16 @@
                 "oberdam.drumond"
             ];
 
-            let todasTarefas = [];
-            try {
-                todasTarefas = await apiListar("tarefas");
-            } catch (e) {
-                console.error(e);
-            }
-
             const missionListEl = document.getElementById("missionList");
 
             const cardsHtml = EQUIPE.map(login => {
-                const tarefasPessoa = todasTarefas.filter(t => t.responsavel === login);
-                const urgente = tarefaMaisUrgente(tarefasPessoa);
+                const tarefasPessoa = tarefas.filter(t => t.responsavel === login);
+
+                // Apenas pendentes para determinar a missão principal
+                const pendentes = tarefasPessoa.filter(
+                    t => !(t.feitas >= t.total && t.total > 0)
+                );
+                const urgente = tarefaMaisUrgente(pendentes);
                 if (!urgente) return "";
 
                 const dias = diasRestantes(urgente.prazo);
@@ -467,102 +667,111 @@
 
             missionListEl.innerHTML = cardsHtml ||
                 `<p class="empty-vocal">Nenhuma tarefa pendente na equipe.</p>`;
-
-            return;
         }
 
         /* ====================================================
-           2. VISÃO VOCALISTA
+           VISÃO VOCALISTA
            ==================================================== */
 
-        document.getElementById("viewPadrao").style.display    = "none";
-        document.getElementById("viewVocalista").style.display = "block";
+        function renderViewVocalista(todasTarefasVocais, sugestoes) {
 
-        let tarefasVocais = [];
-        let sugestoes = [];
-        try {
-            const todasTarefasVocais = await apiListar("tarefas_vocais");
-            tarefasVocais = todasTarefasVocais.filter(
+            document.getElementById("viewPadrao").style.display    = "none";
+            document.getElementById("viewVocalista").style.display = "block";
+
+            const tarefasVocais = todasTarefasVocais.filter(
                 t => t.vocalista === usuario || t.vocalista === "ambos"
             );
-            sugestoes = await apiListar("sugestoes");
-        } catch (e) {
-            console.error(e);
+
+            const aprovadas = sugestoes.filter(s => s.status === "Aprovada");
+
+            const totalTv    = tarefasVocais.length;
+            const concluidTv = tarefasVocais.filter(t => t.status === "Concluído").length;
+            const pctTarefas = totalTv ? Math.round((concluidTv / totalTv) * 100) : 0;
+
+            const nomesAprovadas = aprovadas.map(s => s.nome.toLowerCase());
+            const realizadas = tarefasVocais.filter(t =>
+                t.status === "Concluído" && nomesAprovadas.includes(t.titulo.toLowerCase())
+            ).length;
+            const totalRef   = Math.max(aprovadas.length, 1);
+            const pctMusicas = Math.round((realizadas / totalRef) * 100);
+
+            const chartsEl = document.getElementById("vocalCharts");
+            const graficos = [
+                { label: "Tarefas Concluídas", pct: pctTarefas, color: "#2c7873", sub: `${concluidTv} de ${totalTv} tarefas` },
+                { label: "Músicas Ensaiadas",  pct: pctMusicas, color: "#6c5ba6", sub: `${realizadas} de ${aprovadas.length} do repertório` }
+            ];
+
+            const CIRC = 2 * Math.PI * 48;
+            chartsEl.innerHTML = graficos.map((g, i) => {
+                const dash = (g.pct / 100) * CIRC;
+                return `
+                <div class="chart-card">
+                    <h3>${g.label}</h3>
+                    <div class="donut-wrap">
+                        <svg width="118" height="118" viewBox="0 0 118 118">
+                            <circle class="donut-bg"   cx="59" cy="59" r="48"/>
+                            <circle class="donut-fill" cx="59" cy="59" r="48"
+                                stroke="${g.color}"
+                                stroke-dasharray="${dash} ${CIRC}"
+                                stroke-dashoffset="0"
+                                id="donutFill${i}"/>
+                        </svg>
+                        <span class="donut-label">${g.pct}%</span>
+                    </div>
+                    <p class="chart-sub">${g.sub}</p>
+                </div>`;
+            }).join("");
+
+            const listEl = document.getElementById("vocalTasksList");
+
+            if (!tarefasVocais.length) {
+                listEl.innerHTML = `<p class="empty-vocal">Nenhuma tarefa atribuída ainda.</p>`;
+                return;
+            }
+
+            const statusMap = {
+                "Pendente":       { dot: "dot-pendente",  badge: "badge-p" },
+                "Em andamento":   { dot: "dot-andamento", badge: "badge-a" },
+                "Concluído":      { dot: "dot-concluido", badge: "badge-c" },
+                "Não será feito": { dot: "dot-naofeito",  badge: "badge-n" },
+            };
+
+            function tarefaMaisUrgenteVocal(lista) {
+                if (!lista.length) return null;
+                return lista.slice().sort((a, b) => {
+                    const da = a.prazo ? new Date(a.prazo) : new Date(8640000000000000);
+                    const db = b.prazo ? new Date(b.prazo) : new Date(8640000000000000);
+                    return da - db;
+                })[0];
+            }
+
+            const pendentes    = tarefasVocais.filter(
+                t => t.status !== "Concluído" && t.status !== "Não será feito"
+            );
+            const urgenteVocal = tarefaMaisUrgenteVocal(pendentes);
+            const ordenadas    = urgenteVocal
+                ? [urgenteVocal, ...tarefasVocais.filter(t => t !== urgenteVocal)]
+                : tarefasVocais;
+
+            listEl.innerHTML = ordenadas.map(t => {
+                const s = statusMap[t.status] || statusMap["Pendente"];
+                const ehUrgente = (t === urgenteVocal);
+                return `
+                <div class="vtask-item${ehUrgente ? " vtask-urgent" : ""}">
+                    ${ehUrgente ? `<span class="vtask-urgent-tag">PRÓXIMO PRAZO</span>` : ""}
+                    <span class="vtask-dot ${s.dot}"></span>
+                    <span class="vtask-name">🎵 ${t.titulo}</span>
+                    <span class="vtask-badge ${s.badge}">${t.status}</span>
+                    <span class="vtask-prazo">${fmt(t.prazo)}</span>
+                </div>`;
+            }).join("");
         }
-        const aprovadas = sugestoes.filter(s => s.status === "Aprovada");
 
-        const totalTv    = tarefasVocais.length;
-        const concluidTv = tarefasVocais.filter(t => t.status === "Concluído").length;
-        const pctTarefas = totalTv ? Math.round((concluidTv / totalTv) * 100) : 0;
+        /* ====================================================
+           INICIALIZAÇÃO
+           ==================================================== */
 
-        const nomesAprovadas = aprovadas.map(s => s.nome.toLowerCase());
-        const realizadas = tarefasVocais.filter(t =>
-            t.status === "Concluído" && nomesAprovadas.includes(t.titulo.toLowerCase())
-        ).length;
-        const totalRef   = Math.max(aprovadas.length, 1);
-        const pctMusicas = Math.round((realizadas / totalRef) * 100);
-
-        const chartsEl = document.getElementById("vocalCharts");
-        const graficos = [
-            { label: "Tarefas Concluídas", pct: pctTarefas, color: "#2c7873", sub: `${concluidTv} de ${totalTv} tarefas` },
-            { label: "Músicas Ensaiadas",  pct: pctMusicas, color: "#6c5ba6", sub: `${realizadas} de ${aprovadas.length} do repertório` }
-        ];
-
-        const CIRC = 2 * Math.PI * 48;
-        chartsEl.innerHTML = graficos.map((g, i) => {
-            const dash = (g.pct / 100) * CIRC;
-            return `
-            <div class="chart-card">
-                <h3>${g.label}</h3>
-                <div class="donut-wrap">
-                    <svg width="118" height="118" viewBox="0 0 118 118">
-                        <circle class="donut-bg"   cx="59" cy="59" r="48"/>
-                        <circle class="donut-fill" cx="59" cy="59" r="48"
-                            stroke="${g.color}"
-                            stroke-dasharray="${dash} ${CIRC}"
-                            stroke-dashoffset="0"
-                            id="donutFill${i}"/>
-                    </svg>
-                    <span class="donut-label">${g.pct}%</span>
-                </div>
-                <p class="chart-sub">${g.sub}</p>
-            </div>`;
-        }).join("");
-
-        const listEl = document.getElementById("vocalTasksList");
-
-        if (!tarefasVocais.length) {
-            listEl.innerHTML = `<p class="empty-vocal">Nenhuma tarefa atribuída ainda.</p>`;
-            return;
-        }
-
-        const statusMap = {
-            "Pendente":       { dot: "dot-pendente",  badge: "badge-p" },
-            "Em andamento":   { dot: "dot-andamento", badge: "badge-a" },
-            "Concluído":      { dot: "dot-concluido", badge: "badge-c" },
-            "Não será feito": { dot: "dot-naofeito",  badge: "badge-n" },
-        };
-
-        const pendentes    = tarefasVocais.filter(
-            t => t.status !== "Concluído" && t.status !== "Não será feito"
-        );
-        const urgenteVocal = tarefaMaisUrgente(pendentes);
-        const ordenadas    = urgenteVocal
-            ? [urgenteVocal, ...tarefasVocais.filter(t => t !== urgenteVocal)]
-            : tarefasVocais;
-
-        listEl.innerHTML = ordenadas.map(t => {
-            const s = statusMap[t.status] || statusMap["Pendente"];
-            const ehUrgente = (t === urgenteVocal);
-            return `
-            <div class="vtask-item${ehUrgente ? " vtask-urgent" : ""}">
-                ${ehUrgente ? `<span class="vtask-urgent-tag">PRÓXIMO PRAZO</span>` : ""}
-                <span class="vtask-dot ${s.dot}"></span>
-                <span class="vtask-name">🎵 ${t.titulo}</span>
-                <span class="vtask-badge ${s.badge}">${t.status}</span>
-                <span class="vtask-prazo">${fmt(t.prazo)}</span>
-            </div>`;
-        }).join("");
+        await carregarDashboard();
 
     })();
     </script>
