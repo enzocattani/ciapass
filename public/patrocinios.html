@@ -327,9 +327,10 @@
   var lh=document.getElementById("logoutHeader");
   if(lm) lm.addEventListener("click",logout);
   if(lh) lh.addEventListener("click",logout);
-  var sb=document.getElementById("sidebar");
-  var tg=document.getElementById("toggleSidebar");
-  if(tg&&sb) tg.addEventListener("click",function(){ if(window.innerWidth<=768) sb.classList.toggle("mobile-open"); else sb.classList.toggle("collapsed"); });
+  // Toggle do sidebar (#toggleSidebar) é tratado em patrocinios.js,
+  // que já replica essa lógica (ver seção 1 do arquivo). Removido daqui
+  // para evitar dois listeners no mesmo botão (causava o toggle não
+  // funcionar corretamente / efeito de duplo clique).
 })();
 </script>
 <script src="api.js"></script>
