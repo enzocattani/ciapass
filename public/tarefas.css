@@ -208,6 +208,335 @@ input:focus, select:focus {
 @media (max-width: 768px) {
     .grid { grid-template-columns: 1fr; }
     .box  { padding: 20px; }
+
+    /* Modal → bottom sheet */
+    .modal {
+        align-items: flex-end;
+    }
+
+    .box {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 14px 14px 0 0;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .detalhe-box { width: 100%; }
+
+    /* Botões do modal dividem a linha igualmente */
+    .actions { flex-wrap: wrap; }
+    .actions .btn-primary,
+    .actions .btn-secondary {
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Inputs com font-size 16px evita zoom automático no iOS */
+    input, select, textarea {
+        font-size: 16px;
+    }
+
+    /* Card de tarefa */
+    .card-top { flex-wrap: wrap; }
+}
+
+/* ── Card top row (título + badge) ── */
+.card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.card-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.badge-pendente   { background: var(--navy-100); color: var(--navy-900); }
+.badge-andamento  { background: #fff8e6; color: var(--amber); }
+.badge-concluida  { background: #e3f7ec; color: var(--good); }
+
+/* ── Modal de detalhes ── */
+.detalhe-box {
+    width: 520px;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.detalhe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid var(--line);
+    background: #fafbfd;
+    gap: 12px;
+}
+
+.detalhe-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 6px;
+    padding: 0;
+    border: none;
+}
+
+.detalhe-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.btn-fechar-detalhe {
+    background: none;
+    border: none;
+    font-size: 17px;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: .15s;
+}
+
+.btn-fechar-detalhe:hover {
+    background: var(--navy-100);
+    color: var(--ink);
+}
+
+.detalhe-body {
+    padding: 20px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.detalhe-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--ink);
+}
+
+.detalhe-row-desc {
+    align-items: flex-start;
+}
+
+.detalhe-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    min-width: 110px;
+    flex-shrink: 0;
+}
+
+.detalhe-row p {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.detalhe-bar {
+    margin-top: 4px;
+    height: 8px;
+}
+
+.detalhe-footer {
+    padding: 16px 26px 22px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+}    margin-top: 4px;
+}
+
+/* Card de tarefa */
+.card {
+    background: white;
+    padding: 16px 20px;
+    border-left: 3px solid var(--navy-900);
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--navy-900);
+    cursor: pointer;
+    transition: .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card:hover {
+    box-shadow: 0 4px 14px rgba(15,30,60,.06);
+    transform: translateY(-1px);
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.meta {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+}
+
+/* Barra de progresso */
+.bar {
+    height: 6px;
+    background: var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.fill {
+    height: 100%;
+    background: var(--navy-900);
+    border-radius: 10px;
+    transition: width .3s;
+}
+
+/* Botões */
+.btn-primary {
+    background: var(--navy-900);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: .15s;
+}
+
+.btn-primary:hover { background: var(--navy-800); }
+
+.btn-secondary {
+    background: var(--bg);
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: .15s;
+}
+
+.btn-secondary:hover { background: var(--line); }
+
+/* Modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,20,50,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.hidden { display: none; }
+
+.box {
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 40px rgba(10,20,50,.18);
+    width: 560px;
+    max-width: 95vw;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.box h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+/* Grid do formulário */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+textarea {
+    grid-column: 1 / -1;
+    min-height: 100px;
+    resize: vertical;
+    padding: 10px 13px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    transition: border-color .15s, background .15s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--navy-900);
+    background: white;
+}
+
+input, select {
+    padding: 10px 13px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color .15s, background .15s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--navy-900);
+    background: white;
+}
+
+/* Ações */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .box  { padding: 20px; }
 }
 
 /* ── Card top row (título + badge) ── */
