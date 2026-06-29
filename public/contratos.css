@@ -418,4 +418,45 @@
     .lista-contratos    { grid-template-columns: 1fr; }
     .filtros-contratos  { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 5px; }
     .filtro-btn         { flex: 0 0 auto; }
+
+    /* Modal → bottom sheet */
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal-box {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 14px 14px 0 0;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 22px;
+    }
+
+    .modal-box-pequena { max-width: 100%; }
+
+    /* Botões do modal dividem a linha igualmente */
+    .form-acoes { flex-wrap: wrap; }
+    .form-acoes .btn-cancelar,
+    .form-acoes .btn-salvar,
+    .form-acoes .btn-excluir {
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Inputs com font-size 16px evita zoom automático no iOS */
+    .form-grupo input,
+    .form-grupo select,
+    .form-grupo textarea {
+        font-size: 16px;
+    }
+
+    /* Card de contrato */
+    .contrato-card-footer  { flex-direction: column; align-items: stretch; }
+    .contrato-acoes        { justify-content: stretch; }
+    .contrato-acoes .btn-acao { flex: 1; text-align: center; }
+
+    /* Anexo PDF */
+    .anexo-preview { flex-wrap: wrap; }
 }
