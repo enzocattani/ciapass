@@ -118,24 +118,23 @@
                     <div class="card">
                         <h3>Tarefas Pendentes</h3>
                         <span id="cardTarefas">—</span>
+                        <small id="cardTarefasSub" style="display:block;font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.4"></small>
                     </div>
                     <div class="card">
                         <h3>Próximos Eventos</h3>
                         <span id="cardAgenda">—</span>
+                        <small id="cardAgendaSub" style="display:block;font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.4"></small>
                     </div>
                     <div class="card">
                         <h3>Contratos em Andamento</h3>
                         <span id="cardContratos">—</span>
+                        <small id="cardContratosSub" style="display:block;font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.4"></small>
                     </div>
                     <div class="card">
                         <h3>Patrocínios em Negociação</h3>
                         <span id="cardPatrocinios">—</span>
+                        <small id="cardPatrociniosSub" style="display:block;font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.4"></small>
                     </div>
-                </section>
-
-                <!-- Resumo rápido abaixo dos cards -->
-                <section class="resumo-section" id="resumoSection" style="display:none">
-                    <div class="resumo-grid" id="resumoGrid"></div>
                 </section>
 
                 <section class="missions">
@@ -419,30 +418,6 @@
             })[0];
         }
 
-        /* Retorna o evento mais próximo no futuro (ou hoje) */
-        function eventoMaisProximo(eventos) {
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            const futuros = eventos
-                .filter(e => e.data && new Date(e.data + "T00:00:00") >= hoje)
-                .sort((a, b) => new Date(a.data) - new Date(b.data));
-            return futuros[0] || null;
-        }
-
-        /* Retorna o contrato mais próximo do vencimento (entre os "em andamento") */
-        function contratoMaisProximo(contratos) {
-            const emAndamento = contratos.filter(c => {
-                const st = (c.status || "").toLowerCase();
-                return st === "em andamento" || st === "andamento" || st === "ativo";
-            });
-            if (!emAndamento.length) return null;
-            return emAndamento.slice().sort((a, b) => {
-                const da = a.dataShow || a.data || a.vencimento || "";
-                const db = b.dataShow || b.data || b.vencimento || "";
-                return new Date(da) - new Date(db);
-            })[0];
-        }
-
         const VOCALISTAS = ["juliana.cattani", "pitter.drumond"];
         const isVocal    = VOCALISTAS.includes(usuario);
 
@@ -489,139 +464,107 @@
 
             /* ---- 1. TAREFAS ---- */
 
-            // Tarefas pendentes = não concluídas (feitas < total, ou total = 0)
+            // Tarefas pendentes = não concluídas
             const tarefasPendentes = tarefas.filter(t => !(t.feitas >= t.total && t.total > 0));
 
-            // Tarefas atrasadas = com prazo no passado e não concluídas
-            const tarefasAtrasadas = tarefasPendentes.filter(t => {
-                if (!t.prazo) return false;
-                return new Date(t.prazo + "T00:00:00") < hoje;
-            });
+            // Tarefas atrasadas = prazo no passado e não concluídas
+            const tarefasAtrasadas = tarefasPendentes.filter(t =>
+                t.prazo && new Date(t.prazo + "T00:00:00") < hoje
+            );
 
             // Próxima tarefa por prazo
             const proximaTarefa = tarefaMaisUrgente(tarefasPendentes);
 
             document.getElementById("cardTarefas").textContent = tarefasPendentes.length;
 
+            const subTarefas = document.getElementById("cardTarefasSub");
+            if (tarefasAtrasadas.length > 0) {
+                subTarefas.textContent = `⚠️ ${tarefasAtrasadas.length} atrasada${tarefasAtrasadas.length > 1 ? "s" : ""}`;
+                subTarefas.style.color = "#e05252";
+            } else if (proximaTarefa) {
+                const dias = diasRestantes(proximaTarefa.prazo);
+                if (!proximaTarefa.prazo)   subTarefas.textContent = `Próxima: ${proximaTarefa.titulo}`;
+                else if (dias === 0)         subTarefas.textContent = `Próxima: ${proximaTarefa.titulo} — hoje`;
+                else                         subTarefas.textContent = `Próxima: ${proximaTarefa.titulo} — ${dias}d`;
+            }
+
             /* ---- 2. AGENDA ---- */
 
-            // Próximos eventos = a partir de hoje
+            // Agenda usa campo "date" (vem do agenda.js)
             const proximosEventos = agenda.filter(e => {
-                if (!e.data) return false;
-                return new Date(e.data + "T00:00:00") >= hoje;
+                const campo = e.date || e.data;
+                if (!campo) return false;
+                return new Date(campo + "T00:00:00") >= hoje;
             });
-            const proximoEvento = eventoMaisProximo(agenda);
+
+            // eventoMaisProximo precisa do campo correto
+            const proximoEvento = proximosEventos.length
+                ? proximosEventos.slice().sort((a, b) => {
+                    const da = new Date((a.date || a.data) + "T00:00:00");
+                    const db = new Date((b.date || b.data) + "T00:00:00");
+                    return da - db;
+                })[0]
+                : null;
 
             document.getElementById("cardAgenda").textContent = proximosEventos.length;
 
+            const subAgenda = document.getElementById("cardAgendaSub");
+            if (proximoEvento) {
+                const campoData = proximoEvento.date || proximoEvento.data;
+                const dias = diasRestantes(campoData);
+                const nome = proximoEvento.title || proximoEvento.titulo || "Evento";
+                if (dias === 0)      subAgenda.textContent = `${nome} — hoje`;
+                else if (dias === 1) subAgenda.textContent = `${nome} — amanhã`;
+                else                 subAgenda.textContent = `${nome} — ${dias}d`;
+            }
+
             /* ---- 3. CONTRATOS ---- */
 
-            // Contratos em andamento
+            // Contratos em andamento = status relevante (ver STATUS_CONFIG em contratos.js:
+            // prospeccao | negociacao | producao | confirmado | executado | perdido)
             const contratosAtivos = contratos.filter(c => {
                 const st = (c.status || "").toLowerCase();
-                return st === "em andamento" || st === "andamento" || st === "ativo";
+                return !["executado", "perdido"].includes(st);
             });
-            const proximoContrato = contratoMaisProximo(contratos);
+            const proximoContrato = contratosAtivos.length
+                ? contratosAtivos.slice().sort((a, b) => {
+                    const da = a.data ? new Date(a.data) : new Date(8640000000000000);
+                    const db = b.data ? new Date(b.data) : new Date(8640000000000000);
+                    return da - db;
+                })[0]
+                : null;
 
             document.getElementById("cardContratos").textContent = contratosAtivos.length;
 
+            const subContratos = document.getElementById("cardContratosSub");
+            if (proximoContrato) {
+                const dias = diasRestantes(proximoContrato.data);
+                const nome = proximoContrato.evento || proximoContrato.titulo || "Contrato";
+                if (!proximoContrato.data)  subContratos.textContent = `${nome} — sem data`;
+                else if (dias < 0)          subContratos.textContent = `${nome} — ${Math.abs(dias)}d atrás`;
+                else if (dias === 0)        subContratos.textContent = `${nome} — hoje`;
+                else                        subContratos.textContent = `${nome} — ${dias}d`;
+            }
+
             /* ---- 4. PATROCÍNIOS ---- */
 
-            // Patrocínios em negociação
+            // STATUS_CONFIG em patrocinios.js: pesquisa | contato | reuniao | proposta | negociacao | fechado | perdido
+            // "Em negociação" no dashboard = todos que ainda não fecharam nem foram perdidos
             const patrociniosNegociacao = patrocinios.filter(p => {
                 const st = (p.status || "").toLowerCase();
-                return st === "em negociação" || st === "negociação" || st === "negociacao";
+                return !["fechado", "perdido"].includes(st);
             });
 
             document.getElementById("cardPatrocinios").textContent = patrociniosNegociacao.length;
 
-            /* ---- 5. RESUMO RÁPIDO (atrasadas + próximo evento + próximo contrato) ---- */
-
-            const resumoGrid = document.getElementById("resumoGrid");
-            const resumoSection = document.getElementById("resumoSection");
-            const itensResumo = [];
-
-            if (tarefasAtrasadas.length > 0) {
-                const nomes = tarefasAtrasadas
-                    .slice(0, 3)
-                    .map(t => `<li>${t.titulo} <span class="resumo-sub">(${primeiroNome(t.responsavel)})</span></li>`)
-                    .join("");
-                const extra = tarefasAtrasadas.length > 3
-                    ? `<li class="resumo-sub">+${tarefasAtrasadas.length - 3} mais...</li>`
-                    : "";
-                itensResumo.push(`
-                    <div class="resumo-card resumo-alerta">
-                        <div class="resumo-icon">⚠️</div>
-                        <div class="resumo-body">
-                            <strong>Tarefas atrasadas (${tarefasAtrasadas.length})</strong>
-                            <ul>${nomes}${extra}</ul>
-                        </div>
-                    </div>`);
+            const subPatrocinios = document.getElementById("cardPatrociniosSub");
+            const fechados = patrocinios.filter(p => (p.status || "").toLowerCase() === "fechado").length;
+            if (fechados > 0) {
+                subPatrocinios.textContent = `${fechados} fechado${fechados > 1 ? "s" : ""}`;
             }
 
-            if (proximaTarefa) {
-                const dias = diasRestantes(proximaTarefa.prazo);
-                let prazoTxt;
-                if (!proximaTarefa.prazo)  prazoTxt = "Sem prazo";
-                else if (dias < 0)         prazoTxt = `Atrasada há ${Math.abs(dias)} dia(s)`;
-                else if (dias === 0)        prazoTxt = "Prazo: hoje";
-                else                        prazoTxt = `Prazo em ${dias} dia(s) — ${fmt(proximaTarefa.prazo)}`;
-                itensResumo.push(`
-                    <div class="resumo-card resumo-info">
-                        <div class="resumo-icon">✓</div>
-                        <div class="resumo-body">
-                            <strong>Próxima tarefa</strong>
-                            <p>${proximaTarefa.titulo}</p>
-                            <span class="resumo-sub">${prazoTxt} · ${primeiroNome(proximaTarefa.responsavel)}</span>
-                        </div>
-                    </div>`);
-            }
+            /* ---- 5. MISSÕES DA EQUIPE ---- */
 
-            if (proximoEvento) {
-                const diasEvt = diasRestantes(proximoEvento.data);
-                const prazoEvtTxt = diasEvt === 0
-                    ? "Hoje"
-                    : diasEvt === 1
-                    ? "Amanhã"
-                    : `Em ${diasEvt} dia(s) — ${fmt(proximoEvento.data)}`;
-                itensResumo.push(`
-                    <div class="resumo-card resumo-info">
-                        <div class="resumo-icon">📅</div>
-                        <div class="resumo-body">
-                            <strong>Próximo evento</strong>
-                            <p>${proximoEvento.titulo || proximoEvento.nome || "Evento"}</p>
-                            <span class="resumo-sub">${prazoEvtTxt}</span>
-                        </div>
-                    </div>`);
-            }
-
-            if (proximoContrato) {
-                const dataRef = proximoContrato.dataShow || proximoContrato.data || proximoContrato.vencimento || "";
-                const diasCtr = dataRef ? diasRestantes(dataRef) : null;
-                const prazoCtTxt = diasCtr === null
-                    ? "Sem data definida"
-                    : diasCtr < 0
-                    ? `Venceu há ${Math.abs(diasCtr)} dia(s)`
-                    : diasCtr === 0
-                    ? "Hoje"
-                    : `Em ${diasCtr} dia(s) — ${fmt(dataRef)}`;
-                itensResumo.push(`
-                    <div class="resumo-card resumo-info">
-                        <div class="resumo-icon">📄</div>
-                        <div class="resumo-body">
-                            <strong>Contrato mais próximo</strong>
-                            <p>${proximoContrato.nome || proximoContrato.titulo || "Contrato"}</p>
-                            <span class="resumo-sub">${prazoCtTxt}</span>
-                        </div>
-                    </div>`);
-            }
-
-            if (itensResumo.length > 0) {
-                resumoGrid.innerHTML = itensResumo.join("");
-                resumoSection.style.display = "block";
-            }
-
-            /* ---- 6. MISSÕES DA EQUIPE ---- */
 
             const EQUIPE = [
                 "enzo.cattani",
