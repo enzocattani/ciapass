@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiaPass - Música</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="musica.css">
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand-glyph">C</div>
+            <div class="brand-text">
+                <h2>CiaPass</h2>
+                <span>v1.0</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <span class="menu-section-label">Painel</span>
+            <a href="dashboard.html" class="menu-item"><span class="ico">▤</span><span class="label">Dashboard</span></a>
+            <a href="agenda.html" class="menu-item"><span class="ico">📅</span><span class="label">Agenda</span></a>
+            <a href="tarefas.html" class="menu-item"><span class="ico">✓</span><span class="label">Tarefas</span></a>
+
+            <span class="menu-section-label">Negócios</span>
+            <a href="contratos.html" class="menu-item"><span class="ico">📄</span><span class="label">Contratos</span></a>
+            <a href="patrocinios.html" class="menu-item"><span class="ico">🤝</span><span class="label">Patrocínios</span></a>
+
+            <span class="menu-section-label">Banda</span>
+            <a href="musica.html" class="menu-item active"><span class="ico">🎵</span><span class="label">Música</span></a>
+
+            <button id="logoutMenu" class="menu-item logout-btn"><span class="ico">⏻</span><span class="label">Sair</span></button>
+        </nav>
+    </aside>
+
+    <div class="main-content">
+
+        <header class="topbar">
+            <div class="left-header">
+                <button id="toggleSidebar" class="menu-toggle">☰</button>
+                <h1>CIA PASS</h1>
+            </div>
+            <div class="right-header">
+                <div class="user-info">
+                    <span id="usuarioLogado"></span>
+                    <span id="badgePerfil" class="perfil-badge"></span>
+                </div>
+                <button id="logoutHeader" class="header-logout">Sair</button>
+            </div>
+        </header>
+
+        <main class="dashboard">
+
+            <!-- ABAS DE NAVEGAÇÃO -->
+            <div class="music-tabs">
+                <button class="tab-btn active" data-tab="sugestoes">🎵 Sugestões</button>
+                <button class="tab-btn" data-tab="repertorio">✅ Repertório</button>
+                <button class="tab-btn" data-tab="tarefas-vocais">🎤 Tarefas Vocais</button>
+            </div>
+
+            <!-- ===== ABA 1: SUGESTÕES ===== -->
+            <div class="tab-content active" id="tab-sugestoes">
+
+                <section class="music-section">
+                    <div class="section-header">
+                        <h2>🎵 Sugestão de Músicas</h2>
+                        <p class="section-desc">Sugira uma música para o repertório da Pitter & Cia</p>
+                    </div>
+
+                    <!-- Formulário de sugestão -->
+                    <div class="music-form-card">
+                        <h3>Nova Sugestão</h3>
+                        <div class="music-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome da Música *</label>
+                                    <input type="text" id="inputNomeMusica" placeholder="Ex: Hotel California" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Sugestão de Músico *</label>
+                                    <select id="inputMusicoSugerido">
+                                        <option value="">Selecione...</option>
+                                        <option value="Vocal Masculino">Vocal Masculino</option>
+                                        <option value="Vocal Feminino">Vocal Feminino</option>
+                                        <option value="Banda Inteira">Banda Inteira</option>
+                                        <option value="Pitter">Pitter</option>
+                                        <option value="Juliana">Juliana</option>
+                                        <option value="Dueto">Dueto</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Motivo da Inclusão *</label>
+                                <input type="text" id="inputMotivo" placeholder="Por que essa música seria boa para o repertório?" />
+                            </div>
+                            <div class="form-group">
+                                <label>Link (YouTube ou Spotify) *</label>
+                                <input type="url" id="inputLink" placeholder="https://..." />
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição Adicional</label>
+                                <textarea id="inputDescricao" rows="3" placeholder="Informações extras, tom, dificuldade, etc."></textarea>
+                            </div>
+                            <button class="btn-primary" id="btnSugerirMusica">Enviar Sugestão</button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de sugestões -->
+                    <div class="section-header mt-30">
+                        <h3>Todas as Sugestões</h3>
+                        <div class="filter-row">
+                            <select id="filtroStatus">
+                                <option value="">Todos os status</option>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Em análise">Em análise</option>
+                                <option value="Aprovada">Aprovada</option>
+                                <option value="Rejeitada">Rejeitada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sugestoes-list" id="listaSugestoes">
+                        <p class="empty-state">Nenhuma sugestão ainda. Seja o primeiro a sugerir!</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ===== ABA 2: REPERTÓRIO ===== -->
+            <div class="tab-content" id="tab-repertorio">
+                <section class="music-section">
+                    <div class="section-header">
+                        <h2>✅ Repertório Aprovado</h2>
+                        <p class="section-desc">Músicas aprovadas para o repertório da Pitter & Cia</p>
+                    </div>
+                    <div class="repertorio-grid" id="listaRepertorio">
+                        <p class="empty-state">Nenhuma música aprovada ainda.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ===== ABA 3: TAREFAS VOCAIS ===== -->
+            <div class="tab-content" id="tab-tarefas-vocais">
+                <section class="music-section">
+                    <div class="section-header">
+                        <h2>🎤 Tarefas para Vocalistas</h2>
+                        <p class="section-desc">Ensaios e preparações musicais</p>
+                    </div>
+
+                    <!-- Formulário de tarefa (só admin vê) -->
+                    <div class="music-form-card admin-only" id="formTarefaVocal">
+                        <h3>Criar Tarefa Vocal</h3>
+                        <div class="music-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Título da Música *</label>
+                                    <input type="text" id="tvTitulo" placeholder="Ex: Hotel California" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Vocalista Responsável *</label>
+                                    <select id="tvVocalista">
+                                        <option value="">Selecione...</option>
+                                        <option value="juliana.cattani">Juliana</option>
+                                        <option value="pitter.drumond">Pitter</option>
+                                        <option value="ambos">Ambos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Prazo *</label>
+                                    <input type="date" id="tvPrazo" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Status Inicial</label>
+                                    <select id="tvStatus">
+                                        <option value="Pendente">Pendente</option>
+                                        <option value="Em andamento">Em andamento</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição *</label>
+                                <textarea id="tvDescricao" rows="3" placeholder="O que o vocalista precisa preparar?"></textarea>
+                            </div>
+                            <button class="btn-primary" id="btnCriarTarefaVocal">Criar Tarefa</button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de tarefas -->
+                    <div class="tarefas-vocais-list" id="listaTarefasVocais">
+                        <p class="empty-state">Nenhuma tarefa vocal criada ainda.</p>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+
+        <!-- MODAL: editar sugestão (admin) -->
+        <div class="modal-overlay" id="modalEditarSugestao">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Editar Sugestão</h3>
+                    <button class="modal-close" id="fecharModalSugestao">✕</button>
+                </div>
+                <div class="music-form">
+                    <input type="hidden" id="editSugestaoId" />
+                    <div class="form-group">
+                        <label>Nome da Música</label>
+                        <input type="text" id="editNomeMusica" />
+                    </div>
+                    <div class="form-group">
+                        <label>Motivo</label>
+                        <input type="text" id="editMotivo" />
+                    </div>
+                    <div class="form-group">
+                        <label>Link</label>
+                        <input type="url" id="editLink" />
+                    </div>
+                    <div class="form-group">
+                        <label>Músico Sugerido</label>
+                        <select id="editMusico">
+                            <option value="Vocal Masculino">Vocal Masculino</option>
+                            <option value="Vocal Feminino">Vocal Feminino</option>
+                            <option value="Banda Inteira">Banda Inteira</option>
+                            <option value="Pitter">Pitter</option>
+                            <option value="Juliana">Juliana</option>
+                            <option value="Dueto">Dueto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="editStatus">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em análise">Em análise</option>
+                            <option value="Aprovada">Aprovada</option>
+                            <option value="Rejeitada">Rejeitada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição Adicional</label>
+                        <textarea id="editDescricao" rows="3"></textarea>
+                    </div>
+                    <button class="btn-primary" id="btnSalvarEdicaoSugestao">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: editar tarefa vocal -->
+        <div class="modal-overlay" id="modalEditarTarefa">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Atualizar Tarefa</h3>
+                    <button class="modal-close" id="fecharModalTarefa">✕</button>
+                </div>
+                <div class="music-form">
+                    <input type="hidden" id="editTarefaId" />
+                    <div class="form-group">
+                        <label>Novo Status</label>
+                        <select id="editTarefaStatus">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em andamento">Em andamento</option>
+                            <option value="Concluído">Concluído</option>
+                            <option value="Não será feito">Não será feito</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="btnSalvarEdicaoTarefa">Salvar Status</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>CiaPass V1</p>
+            <p>Sistema interno de gestão da Pitter & Cia</p>
+        </footer>
+
+    </div>
+
+    <script src="api.js"></script>
+    <script src="musica.js"></script>
+
+</body>
+</html>
