@@ -47,6 +47,12 @@
         elUsuarioLogado.textContent = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
     }
 
+    // Lista fixa de usuários com permissão de administrador.
+    // O valor comparado é exatamente o que fica salvo em
+    // localStorage.usuarioLogado pelo sistema de login.
+    // (Precisa vir ANTES de cargoDe(), que usa ADMINS abaixo.)
+    const ADMINS = ["oberdam.drumond", "mariana.cattani"];
+
     // Exibe o badge de perfil (Admin / Vocalista / Membro)
     const VOCALISTAS = ["juliana.cattani", "pitter.drumond"];
     function cargoDe(login) {
@@ -164,11 +170,6 @@
     let contratos = [];
     let filtroAtual = "todos";
     let idParaExcluir = null;
-
-    // Lista fixa de usuários com permissão de administrador.
-    // O valor comparado é exatamente o que fica salvo em
-    // localStorage.usuarioLogado pelo sistema de login.
-    const ADMINS = ["oberdam.drumond", "mariana.cattani"];
 
     const ehAdmin = ADMINS.includes(usuarioLogado);
 
