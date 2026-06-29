@@ -43,7 +43,22 @@
 
     const elUsuarioLogado = document.getElementById("usuarioLogado");
     if (elUsuarioLogado) {
-        elUsuarioLogado.textContent = usuarioLogado;
+        const primeiroNome = usuarioLogado.split(".")[0];
+        elUsuarioLogado.textContent = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
+    }
+
+    // Exibe o badge de perfil (Admin / Vocalista / Membro)
+    const VOCALISTAS = ["juliana.cattani", "pitter.drumond"];
+    function cargoDe(login) {
+        if (ADMINS.includes(login)) return "Admin";
+        if (VOCALISTAS.includes(login)) return "Vocalista";
+        return "Membro";
+    }
+    const badgeEl = document.getElementById("badgePerfil");
+    if (badgeEl) {
+        const cargo = cargoDe(usuarioLogado);
+        badgeEl.textContent = cargo;
+        badgeEl.className = "perfil-badge " + cargo.toLowerCase();
     }
 
     const sidebar = document.getElementById("sidebar");
@@ -153,7 +168,7 @@
     // Lista fixa de usuários com permissão de administrador.
     // O valor comparado é exatamente o que fica salvo em
     // localStorage.usuarioLogado pelo sistema de login.
-    const ADMINS = ["oberdam.drummond", "mariana.cattani"];
+    const ADMINS = ["oberdam.drumond", "mariana.cattani"];
 
     const ehAdmin = ADMINS.includes(usuarioLogado);
 
