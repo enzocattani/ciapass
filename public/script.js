@@ -6,7 +6,10 @@ const usuarios = [
     "ian.miranda",
     "oberdam.drumond",
     "juliana.cattani",
-    "pitter.drumond"
+    "pitter.drumond",
+    "fernanda.cattani",
+    "erika.drumond",
+    "margot.drumond"
 ];
 
 // Senha padrão
