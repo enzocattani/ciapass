@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiaPass - Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="api.js"></script>
+</head>
+<body>
+
+    <!-- Overlay mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand-glyph">C</div>
+            <div class="brand-text">
+                <h2>CiaPass</h2>
+                <span>v1.0</span>
+            </div>
+            <button class="sidebar-close" id="sidebarClose">✕</button>
+        </div>
+        <nav class="menu">
+            <span class="menu-section-label">Painel</span>
+            <a href="dashboard.html" class="menu-item active"><span class="ico">▤</span><span class="label">Dashboard</span></a>
+            <a href="agenda.html" class="menu-item"><span class="ico">📅</span><span class="label">Agenda</span></a>
+            <a href="tarefas.html" class="menu-item"><span class="ico">✓</span><span class="label">Tarefas</span></a>
+
+            <span class="menu-section-label">Negócios</span>
+            <a href="contratos.html" class="menu-item"><span class="ico">📄</span><span class="label">Contratos</span></a>
+            <a href="patrocinios.html" class="menu-item"><span class="ico">🤝</span><span class="label">Patrocínios</span></a>
+
+            <span class="menu-section-label">Banda</span>
+            <a href="musica.html" class="menu-item"><span class="ico">🎵</span><span class="label">Música</span></a>
+
+            <button id="logoutMenu" class="menu-item logout-btn"><span class="ico">⏻</span><span class="label">Sair</span></button>
+        </nav>
+    </aside>
+
+    <div class="main-content">
+
+        <header class="topbar">
+            <div class="left-header">
+                <button id="toggleSidebar" class="menu-toggle">☰</button>
+                <h1>CIAPASS / DASHBOARD</h1>
+            </div>
+            <div class="right-header">
+                <div class="user-info">
+                    <span id="usuarioLogado"></span>
+                    <span id="badgePerfil" class="perfil-badge"></span>
+                </div>
+                <button id="logoutHeader" class="header-logout">Sair</button>
+            </div>
+        </header>
+
+        <main class="dashboard">
+
+            <section class="welcome-section">
+                <h2 id="mensagemBoasVindas">Bem-vindo</h2>
+                <span class="welcome-meta" id="dataHoje"></span>
+            </section>
+
+            <!-- ===== SEÇÃO DE AVISOS ===== -->
+            <section class="avisos-section" id="avisosSection">
+                <div class="avisos-header">
+                    <div class="avisos-header-left">
+                        <span class="avisos-ico">📢</span>
+                        <h2>Avisos</h2>
+                        <span class="avisos-count" id="avisosCount" style="display:none"></span>
+                    </div>
+                    <!-- Botão só aparece para admins via JS -->
+                    <button class="btn-novo-aviso" id="btnNovoAviso" style="display:none">
+                        + Novo aviso
+                    </button>
+                </div>
+                <div class="avisos-list" id="avisosList">
+                    <p class="avisos-empty">Nenhum aviso ativo no momento.</p>
+                </div>
+            </section>
+
+            <!-- Modal novo aviso (admin) -->
+            <div class="modal-overlay" id="modalAviso" style="display:none">
+                <div class="modal-box">
+                    <div class="modal-head">
+                        <h3>Novo Aviso</h3>
+                        <button class="modal-close" id="modalClose">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <label for="avisoTitulo">Título</label>
+                            <input type="text" id="avisoTitulo" placeholder="Ex: Ensaio cancelado amanhã" maxlength="80">
+                        </div>
+                        <div class="input-group">
+                            <label for="avisoTexto">Mensagem</label>
+                            <textarea id="avisoTexto" rows="3" placeholder="Descreva o aviso..."></textarea>
+                        </div>
+                        <div class="modal-tipo-row">
+                            <label>Tipo</label>
+                            <div class="tipo-btns">
+                                <button class="tipo-btn tipo-info active" data-tipo="info">ℹ️ Info</button>
+                                <button class="tipo-btn tipo-alerta" data-tipo="alerta">⚠️ Alerta</button>
+                                <button class="tipo-btn tipo-urgente" data-tipo="urgente">🔴 Urgente</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-foot">
+                        <button class="btn-cancelar" id="btnCancelarAviso">Cancelar</button>
+                        <button class="btn-publicar" id="btnPublicarAviso">Publicar aviso</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== VISÃO PADRÃO (todos exceto vocalistas) ===== -->
+            <div id="viewPadrao">
+
+                <section class="cards">
+                    <div class="card">
+                        <h3>Tarefas Pendentes</h3>
+                        <span id="cardTarefas">0</span>
+                    </div>
+                    <div class="card">
+                        <h3>Próximos Eventos</h3>
+                        <span>0</span>
+                    </div>
+                    <div class="card">
+                        <h3>Contratos em Andamento</h3>
+                        <span>0</span>
+                    </div>
+                    <div class="card">
+                        <h3>Patrocínios em Negociação</h3>
+                        <span>0</span>
+                    </div>
+                </section>
+
+                <section class="missions">
+                    <h2>Missões da Equipe</h2>
+                    <div class="mission-list" id="missionList"></div>
+                </section>
+
+            </div>
+
+            <!-- ===== VISÃO VOCALISTA ===== -->
+            <div id="viewVocalista" style="display:none">
+                <div class="vocal-dashboard">
+                    <div class="vocal-charts" id="vocalCharts"></div>
+                    <div class="vocal-tasks-section">
+                        <h3>Minhas Tarefas Musicais</h3>
+                        <div id="vocalTasksList"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="footer">
+            <p>CiaPass V1</p>
+            <p>Sistema interno de gestão da Pitter &amp; Cia</p>
+        </footer>
+
+    </div>
+
+    <script>
+    (async function () {
+
+        /* ====================================================
+           0. SESSÃO / LOGOUT / SIDEBAR
+           ==================================================== */
+
+        const usuario = localStorage.getItem("usuarioLogado") || "";
+
+        if (!usuario) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        function primeiroNome(login) {
+            if (!login) return "";
+            const parte = login.split(".")[0];
+            return parte.charAt(0).toUpperCase() + parte.slice(1);
+        }
+
+        const ADMINS           = ["oberdam.drumond", "mariana.cattani"];
+        const VOCALISTAS_CARGO = ["juliana.cattani", "pitter.drumond"];
+
+        function cargoDe(login) {
+            if (ADMINS.includes(login))           return "Admin";
+            if (VOCALISTAS_CARGO.includes(login)) return "Vocalista";
+            return "Membro";
+        }
+
+        const nomeExibido  = primeiroNome(usuario);
+        const cargoExibido = cargoDe(usuario);
+        const isAdmin      = ADMINS.includes(usuario);
+
+        document.getElementById("usuarioLogado").textContent = nomeExibido;
+        const badgeEl = document.getElementById("badgePerfil");
+        if (badgeEl) {
+            badgeEl.textContent = cargoExibido;
+            badgeEl.className   = "perfil-badge " + cargoExibido.toLowerCase();
+        }
+        document.getElementById("mensagemBoasVindas").textContent = "Bem-vindo, " + nomeExibido;
+
+        /* ---- Sidebar: toggle desktop collapse / mobile drawer ---- */
+        const sidebar      = document.getElementById("sidebar");
+        const overlay      = document.getElementById("sidebarOverlay");
+        const sidebarClose = document.getElementById("sidebarClose");
+
+        function abrirSidebarMobile() {
+            sidebar.classList.add("mobile-open");
+            overlay.classList.add("active");
+            document.body.classList.add("sidebar-aberta");
+        }
+        function fecharSidebarMobile() {
+            sidebar.classList.remove("mobile-open");
+            overlay.classList.remove("active");
+            document.body.classList.remove("sidebar-aberta");
+        }
+
+        document.getElementById("toggleSidebar").addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.contains("mobile-open")
+                    ? fecharSidebarMobile()
+                    : abrirSidebarMobile();
+            } else {
+                sidebar.classList.toggle("collapsed");
+            }
+        });
+
+        overlay.addEventListener("click", fecharSidebarMobile);
+        sidebarClose.addEventListener("click", fecharSidebarMobile);
+
+        /* Fechar ao navegar (mobile) */
+        sidebar.querySelectorAll(".menu-item").forEach(item => {
+            item.addEventListener("click", () => {
+                if (window.innerWidth <= 768) fecharSidebarMobile();
+            });
+        });
+
+        /* ---- Logout ---- */
+        function realizarLogout() {
+            localStorage.removeItem("usuarioLogado");
+            window.location.href = "index.html";
+        }
+        document.getElementById("logoutHeader").addEventListener("click", realizarLogout);
+        document.getElementById("logoutMenu").addEventListener("click", realizarLogout);
+
+        /* ---- Data ---- */
+        const hojeEl = document.getElementById("dataHoje");
+        if (hojeEl) {
+            hojeEl.textContent = new Date().toLocaleDateString("pt-BR", {
+                weekday: "long", day: "2-digit", month: "long"
+            });
+        }
+
+        /* ====================================================
+           AVISOS — localStorage com TTL de 24h
+           ==================================================== */
+
+        const AVISOS_KEY = "ciapass_avisos";
+        const TTL_MS     = 24 * 60 * 60 * 1000;
+
+        function carregarAvisos() {
+            try {
+                const raw = localStorage.getItem(AVISOS_KEY);
+                if (!raw) return [];
+                const lista = JSON.parse(raw);
+                const agora = Date.now();
+                return lista.filter(a => (agora - a.criadoEm) < TTL_MS);
+            } catch { return []; }
+        }
+
+        function salvarAvisos(lista) {
+            localStorage.setItem(AVISOS_KEY, JSON.stringify(lista));
+        }
+
+        function renderAvisos() {
+            const lista   = carregarAvisos();
+            const listEl  = document.getElementById("avisosList");
+            const countEl = document.getElementById("avisosCount");
+
+            if (!lista.length) {
+                listEl.innerHTML = `<p class="avisos-empty">Nenhum aviso ativo no momento.</p>`;
+                countEl.style.display = "none";
+                return;
+            }
+
+            countEl.style.display = "inline-flex";
+            countEl.textContent   = lista.length;
+
+            const agora = Date.now();
+            listEl.innerHTML = lista.map((a, i) => {
+                const restante = TTL_MS - (agora - a.criadoEm);
+                const horas    = Math.floor(restante / 3600000);
+                const mins     = Math.floor((restante % 3600000) / 60000);
+                const tempoTxt = horas > 0
+                    ? `expira em ${horas}h${mins}m`
+                    : `expira em ${mins}m`;
+                const tipoIcone = { info: "ℹ️", alerta: "⚠️", urgente: "🔴" }[a.tipo] || "ℹ️";
+
+                return `
+                <div class="aviso-card aviso-${a.tipo}" data-idx="${i}">
+                    <div class="aviso-top">
+                        <span class="aviso-ico">${tipoIcone}</span>
+                        <strong class="aviso-titulo">${a.titulo}</strong>
+                        ${isAdmin ? `<button class="aviso-del" data-idx="${i}" title="Remover aviso">✕</button>` : ""}
+                    </div>
+                    <p class="aviso-texto">${a.texto}</p>
+                    <div class="aviso-meta">
+                        <span>${a.autor}</span>
+                        <span class="aviso-ttl">${tempoTxt}</span>
+                    </div>
+                </div>`;
+            }).join("");
+
+            /* Botões deletar (só admin vê) */
+            if (isAdmin) {
+                listEl.querySelectorAll(".aviso-del").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const idx   = parseInt(btn.dataset.idx);
+                        const atual = carregarAvisos();
+                        atual.splice(idx, 1);
+                        salvarAvisos(atual);
+                        renderAvisos();
+                    });
+                });
+            }
+        }
+
+        /* Botão "Novo aviso" visível só para admin */
+        if (isAdmin) {
+            document.getElementById("btnNovoAviso").style.display = "inline-flex";
+        }
+
+        /* ---- Modal ---- */
+        const modalEl = document.getElementById("modalAviso");
+        let tipoSelecionado = "info";
+
+        document.getElementById("btnNovoAviso").addEventListener("click", () => {
+            modalEl.style.display = "flex";
+            document.getElementById("avisoTitulo").value = "";
+            document.getElementById("avisoTexto").value  = "";
+            tipoSelecionado = "info";
+            modalEl.querySelectorAll(".tipo-btn").forEach(b => {
+                b.classList.toggle("active", b.dataset.tipo === "info");
+            });
+        });
+
+        function fecharModal() { modalEl.style.display = "none"; }
+        document.getElementById("modalClose").addEventListener("click", fecharModal);
+        document.getElementById("btnCancelarAviso").addEventListener("click", fecharModal);
+        modalEl.addEventListener("click", e => { if (e.target === modalEl) fecharModal(); });
+
+        /* Seleção de tipo */
+        modalEl.querySelectorAll(".tipo-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                tipoSelecionado = btn.dataset.tipo;
+                modalEl.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+            });
+        });
+
+        /* Publicar aviso */
+        document.getElementById("btnPublicarAviso").addEventListener("click", () => {
+            const titulo = document.getElementById("avisoTitulo").value.trim();
+            const texto  = document.getElementById("avisoTexto").value.trim();
+            if (!titulo || !texto) {
+                alert("Preencha título e mensagem.");
+                return;
+            }
+            const atual = carregarAvisos();
+            atual.unshift({
+                titulo,
+                texto,
+                tipo:     tipoSelecionado,
+                autor:    primeiroNome(usuario),
+                criadoEm: Date.now()
+            });
+            salvarAvisos(atual);
+            renderAvisos();
+            fecharModal();
+        });
+
+        /* Render inicial + atualização do TTL a cada minuto */
+        renderAvisos();
+        setInterval(renderAvisos, 60000);
+
+        /* ====================================================
+           HELPERS DE DATA / PRAZO
+           ==================================================== */
+
+        function fmt(iso) {
+            if (!iso) return "";
+            const [y, m, d] = iso.split("-");
+            return `${d}/${m}/${y}`;
+        }
+
+        function diasRestantes(iso) {
+            if (!iso) return Infinity;
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const prazo = new Date(iso + "T00:00:00");
+            return Math.round((prazo - hoje) / 86400000);
+        }
+
+        function tarefaMaisUrgente(lista) {
+            if (!lista.length) return null;
+            return lista.slice().sort((a, b) => {
+                const da = a.prazo ? new Date(a.prazo) : new Date(8640000000000000);
+                const db = b.prazo ? new Date(b.prazo) : new Date(8640000000000000);
+                return da - db;
+            })[0];
+        }
+
+        const VOCALISTAS = ["juliana.cattani", "pitter.drumond"];
+        const isVocal    = VOCALISTAS.includes(usuario);
+
+        /* ====================================================
+           1. VISÃO PADRÃO — MISSÕES DA EQUIPE
+           ==================================================== */
+
+        if (!isVocal) {
+
+            const EQUIPE = [
+                "enzo.cattani",
+                "mariana.cattani",
+                "kauan.airon",
+                "ian.miranda",
+                "oberdam.drumond"
+            ];
+
+            let todasTarefas = [];
+            try {
+                todasTarefas = await apiListar("tarefas");
+            } catch (e) {
+                console.error(e);
+            }
+
+            const missionListEl = document.getElementById("missionList");
+
+            const cardsHtml = EQUIPE.map(login => {
+                const tarefasPessoa = todasTarefas.filter(t => t.responsavel === login);
+                const urgente = tarefaMaisUrgente(tarefasPessoa);
+                if (!urgente) return "";
+
+                const dias = diasRestantes(urgente.prazo);
+                let prazoTxt;
+                if (!urgente.prazo) {
+                    prazoTxt = "Sem prazo definido";
+                } else if (dias < 0) {
+                    prazoTxt = `Atrasada há ${Math.abs(dias)}d (${fmt(urgente.prazo)})`;
+                } else if (dias === 0) {
+                    prazoTxt = `Prazo: hoje`;
+                } else {
+                    prazoTxt = `Prazo em ${dias}d (${fmt(urgente.prazo)})`;
+                }
+
+                const urgenteClasse = (dias <= 2) ? " mission-urgent" : "";
+
+                return `
+                <div class="mission-card${urgenteClasse}">
+                    <h3>${primeiroNome(login)}</h3>
+                    <p>${urgente.titulo}</p>
+                    <span class="mission-deadline">${prazoTxt}</span>
+                </div>`;
+            }).join("");
+
+            missionListEl.innerHTML = cardsHtml ||
+                `<p class="empty-vocal">Nenhuma tarefa pendente na equipe.</p>`;
+
+            return;
+        }
+
+        /* ====================================================
+           2. VISÃO VOCALISTA
+           ==================================================== */
+
+        document.getElementById("viewPadrao").style.display    = "none";
+        document.getElementById("viewVocalista").style.display = "block";
+
+        let tarefasVocais = [];
+        let sugestoes = [];
+        try {
+            const todasTarefasVocais = await apiListar("tarefas_vocais");
+            tarefasVocais = todasTarefasVocais.filter(
+                t => t.vocalista === usuario || t.vocalista === "ambos"
+            );
+            sugestoes = await apiListar("sugestoes");
+        } catch (e) {
+            console.error(e);
+        }
+        const aprovadas = sugestoes.filter(s => s.status === "Aprovada");
+
+        const totalTv    = tarefasVocais.length;
+        const concluidTv = tarefasVocais.filter(t => t.status === "Concluído").length;
+        const pctTarefas = totalTv ? Math.round((concluidTv / totalTv) * 100) : 0;
+
+        const nomesAprovadas = aprovadas.map(s => s.nome.toLowerCase());
+        const realizadas = tarefasVocais.filter(t =>
+            t.status === "Concluído" && nomesAprovadas.includes(t.titulo.toLowerCase())
+        ).length;
+        const totalRef   = Math.max(aprovadas.length, 1);
+        const pctMusicas = Math.round((realizadas / totalRef) * 100);
+
+        const chartsEl = document.getElementById("vocalCharts");
+        const graficos = [
+            { label: "Tarefas Concluídas", pct: pctTarefas, color: "#2c7873", sub: `${concluidTv} de ${totalTv} tarefas` },
+            { label: "Músicas Ensaiadas",  pct: pctMusicas, color: "#6c5ba6", sub: `${realizadas} de ${aprovadas.length} do repertório` }
+        ];
+
+        const CIRC = 2 * Math.PI * 48;
+        chartsEl.innerHTML = graficos.map((g, i) => {
+            const dash = (g.pct / 100) * CIRC;
+            return `
+            <div class="chart-card">
+                <h3>${g.label}</h3>
+                <div class="donut-wrap">
+                    <svg width="118" height="118" viewBox="0 0 118 118">
+                        <circle class="donut-bg"   cx="59" cy="59" r="48"/>
+                        <circle class="donut-fill" cx="59" cy="59" r="48"
+                            stroke="${g.color}"
+                            stroke-dasharray="${dash} ${CIRC}"
+                            stroke-dashoffset="0"
+                            id="donutFill${i}"/>
+                    </svg>
+                    <span class="donut-label">${g.pct}%</span>
+                </div>
+                <p class="chart-sub">${g.sub}</p>
+            </div>`;
+        }).join("");
+
+        const listEl = document.getElementById("vocalTasksList");
+
+        if (!tarefasVocais.length) {
+            listEl.innerHTML = `<p class="empty-vocal">Nenhuma tarefa atribuída ainda.</p>`;
+            return;
+        }
+
+        const statusMap = {
+            "Pendente":       { dot: "dot-pendente",  badge: "badge-p" },
+            "Em andamento":   { dot: "dot-andamento", badge: "badge-a" },
+            "Concluído":      { dot: "dot-concluido", badge: "badge-c" },
+            "Não será feito": { dot: "dot-naofeito",  badge: "badge-n" },
+        };
+
+        const pendentes    = tarefasVocais.filter(
+            t => t.status !== "Concluído" && t.status !== "Não será feito"
+        );
+        const urgenteVocal = tarefaMaisUrgente(pendentes);
+        const ordenadas    = urgenteVocal
+            ? [urgenteVocal, ...tarefasVocais.filter(t => t !== urgenteVocal)]
+            : tarefasVocais;
+
+        listEl.innerHTML = ordenadas.map(t => {
+            const s = statusMap[t.status] || statusMap["Pendente"];
+            const ehUrgente = (t === urgenteVocal);
+            return `
+            <div class="vtask-item${ehUrgente ? " vtask-urgent" : ""}">
+                ${ehUrgente ? `<span class="vtask-urgent-tag">PRÓXIMO PRAZO</span>` : ""}
+                <span class="vtask-dot ${s.dot}"></span>
+                <span class="vtask-name">🎵 ${t.titulo}</span>
+                <span class="vtask-badge ${s.badge}">${t.status}</span>
+                <span class="vtask-prazo">${fmt(t.prazo)}</span>
+            </div>`;
+        }).join("");
+
+    })();
+    </script>
+
+</body>
+</html>
